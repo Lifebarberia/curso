@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeBarberia | Curso Profesional de Barbería</title>
+    <!-- Carga de Tailwind CSS para un diseño moderno y responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de las tipografías "Cinzel" y "Inter" para un estilo profesional y artístico -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Carga de Font Awesome para los íconos de la página -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Carga de la biblioteca Three.js para renderizar los elementos 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0c0a09;
+        }
+        h1, h2, h3 {
+            font-family: 'Cinzel', serif;
+        }
+        /* Estilo para el scroll suave entre secciones */
+        html {
+            scroll-behavior: smooth;
+        }
+        section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+        /* Estilo del contenedor de la escena 3D */
+        #three-container {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+        /* Overlay oscuro para mejorar la legibilidad del texto sobre las imágenes */
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            z-index: 10;
+        }
+        /* Animación de los elementos que aparecen al hacer scroll */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        .fade-in-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Animación para el botón de llamada a la acción */
+        @keyframes pulse-once {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .animate-pulse-once {
+            animation: pulse-once 2s ease-in-out;
+        }
+        .text-shadow-custom {
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+        }
+        
+        /* Ajustes de responsive para la tabla del plan de estudios */
+        @media (max-width: 768px) {
+            .responsive-table th, .responsive-table td {
+                padding: 0.75rem;
+                font-size: 0.875rem;
+            }
+        }
+        @media (max-width: 640px) {
+            .responsive-table th, .responsive-table td {
+                display: block;
+                width: 100%;
+                text-align: center;
+            }
+            .responsive-table thead {
+                display: none;
+            }
+            .responsive-table tbody tr {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 1rem;
+                border-bottom: 2px solid #3f3f46;
+            }
+        }
+        /* Estilo para el contenedor del video de Instagram */
+        .instagram-video-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .instagram-media {
+            width: 100% !important;
+            min-width: 100% !important;
+        }
+    </style>
+</head>
+<body class="bg-stone-950 text-gray-100">
+
+    <!-- Navbar: Menú de navegación fijo -->
+    <header class="fixed top-0 left-0 w-full z-50 bg-stone-950/70 backdrop-blur-sm shadow-lg">
+        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="#inicio" class="text-3xl font-bold text-gray-50 flex items-center">
+                <i class="fas fa-cut mr-2 text-yellow-500"></i>
+                <span class="tracking-wide">LifeBarberia</span>
+            </a>
+            <ul class="hidden md:flex space-x-8 text-lg">
+                <li><a href="#nuestra-esencia" class="hover:text-yellow-500 transition-colors">Esencia</a></li>
+                <li><a href="#objetivo" class="hover:text-yellow-500 transition-colors">Objetivo</a></li>
+                <li><a href="#plan-de-estudio" class="hover:text-yellow-500 transition-colors">Plan de Estudio</a></li>
+                <li><a href="#precios" class="hover:text-yellow-500 transition-colors">Precios</a></li>
+                <li><a href="#galeria" class="hover:text-yellow-500 transition-colors">Galería</a></li>
+                <li><a href="#contacto" class="hover:text-yellow-500 transition-colors">Contacto</a></li>
+            </ul>
+            <!-- Botón de menú para dispositivos móviles -->
+            <button id="mobile-menu-button" class="md:hidden text-2xl text-gray-50">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+        <!-- Menú desplegable para móviles -->
+        <div id="mobile-menu" class="hidden md:hidden bg-stone-950/90 text-center py-4">
+            <ul class="flex flex-col space-y-4 text-lg">
+                <li><a href="#nuestra-esencia" class="block py-2 hover:text-yellow-500 transition-colors">Esencia</a></li>
+                <li><a href="#objetivo" class="block py-2 hover:text-yellow-500 transition-colors">Objetivo</a></li>
+                <li><a href="#plan-de-estudio" class="block py-2 hover:text-yellow-500 transition-colors">Plan de Estudio</a></li>
+                <li><a href="#precios" class="block py-2 hover:text-yellow-500 transition-colors">Precios</a></li>
+                <li><a href="#galeria" class="block py-2 hover:text-yellow-500 transition-colors">Galería</a></li>
+                <li><a href="#contacto" class="block py-2 hover:text-yellow-500 transition-colors">Contacto</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Sección Hero: La primera impresión con el elemento 3D -->
+    <section id="inicio" class="relative flex items-center justify-center text-center px-4 overflow-hidden">
+        <!-- Contenedor para la escena 3D de Three.js -->
+        <div id="three-container"></div>
+        <div class="absolute inset-0 bg-black opacity-75 z-20"></div>
+        <div class="relative z-30 max-w-4xl px-8">
+            <h1 class="text-5xl md:text-8xl font-bold text-white tracking-tight leading-tight mb-4 fade-in-up text-shadow-custom">
+                <span class="text-yellow-500">El arte de la navaja.</span> <br> Tu legado comienza aquí.
+            </h1>
+            <p class="text-lg md:text-2xl text-gray-200 mb-8 max-w-2xl mx-auto fade-in-up text-shadow-custom" style="animation-delay: 0.5s;">
+                Más que un oficio, una pasión. Te entrenamos para ser un artista, un maestro del estilo y la confianza.
+            </p>
+            <a href="#plan-de-estudio" class="inline-block bg-yellow-500 text-stone-950 text-xl font-bold py-4 px-12 rounded-full transition-transform hover:scale-105 active:scale-95 shadow-2xl fade-in-up animate-pulse-once" style="animation-delay: 1s;">
+                Conoce el Plan de Estudio
+            </a>
+        </div>
+    </section>
+
+    <!-- Sección "Nuestra Esencia y Valores" -->
+    <section id="nuestra-esencia" class="relative py-24 md:py-40 flex items-center overflow-hidden bg-stone-950">
+        <div class="relative z-20 container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
+            <div class="fade-in-up bg-stone-900/80 backdrop-blur-sm p-8 md:p-12 rounded-2xl shadow-2xl max-w-xl mx-auto md:mx-0">
+                <h2 class="text-4xl md:text-5xl text-yellow-500 font-bold mb-6">
+                    Nuestra Esencia
+                </h2>
+                <p class="text-gray-300 text-lg leading-relaxed mb-4">
+                    En LifeBarberia, la barbería es una forma de arte que combina técnica, precisión y un profundo sentido de la estética. Nuestros programas están diseñados por maestros barberos con años de experiencia, enfocados en un currículo que te hará dominar desde los cortes clásicos hasta las últimas tendencias.
+                </p>
+                <div class="mt-8 space-y-4">
+                    <h3 class="text-2xl font-bold text-white">Nuestros Valores</h3>
+                    <ul class="text-gray-300 text-lg space-y-2">
+                        <li><span class="font-bold text-yellow-500">Excelencia:</span> Buscamos la perfección en cada corte.</li>
+                        <li><span class="font-bold text-yellow-500">Pasión:</span> Creemos que la dedicación es la clave del éxito.</li>
+                        <li><span class="font-bold text-yellow-500">Innovación:</span> Siempre a la vanguardia de las últimas tendencias.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="fade-in-up rounded-2xl shadow-2xl overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1596708064245-c41935c3c0ad?q=80&w=2940&auto=format&fit=crop" alt="Barbero trabajando con tijeras" class="w-full h-auto object-cover transition-transform hover:scale-110 duration-500">
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección "Objetivo del Curso" -->
+    <section id="objetivo" class="py-24 md:py-40 bg-stone-900">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-16 fade-in-up">
+                Objetivo del <span class="text-yellow-500">Curso</span>
+            </h2>
+            <div class="max-w-4xl mx-auto text-lg text-gray-300 leading-relaxed fade-in-up">
+                <p class="mb-4">
+                    Nuestro objetivo es formarte como un profesional de la barbería altamente calificado, con las habilidades técnicas y la visión artística necesarias para crear un impacto. Al finalizar el curso, serás capaz de:
+                </p>
+                <ul class="list-none md:list-disc text-left mx-auto text-xl space-y-3">
+                    <li class="flex items-start md:items-center"><i class="fas fa-check-circle text-yellow-500 mr-4 mt-1 md:mt-0"></i>Dominar las técnicas de corte, afeitado y estilizado.</li>
+                    <li class="flex items-start md:items-center"><i class="fas fa-check-circle text-yellow-500 mr-4 mt-1 md:mt-0"></i>Utilizar y mantener correctamente las herramientas de trabajo.</li>
+                    <li class="flex items-start md:items-center"><i class="fas fa-check-circle text-yellow-500 mr-4 mt-1 md:mt-0"></i>Desarrollar tu marca personal y gestionar tu propio negocio.</li>
+                    <li class="flex items-start md:items-center"><i class="fas fa-check-circle text-yellow-500 mr-4 mt-1 md:mt-0"></i>Ofrecer una experiencia de cliente excepcional y memorable.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección "Plan de Estudio" detallado -->
+    <section id="plan-de-estudio" class="py-24 md:py-40 bg-stone-900">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-16 fade-in-up">
+                Plan de <span class="text-yellow-500">Estudio</span>
+            </h2>
+            <div class="max-w-5xl mx-auto overflow-x-auto responsive-table">
+                <table class="w-full text-left rounded-xl overflow-hidden shadow-2xl fade-in-up">
+                    <thead class="bg-yellow-500 text-stone-950 font-bold text-lg">
+                        <tr>
+                            <th class="p-4 rounded-tl-xl">Semana</th>
+                            <th class="p-4">Clases Teórico-Demostrativas</th>
+                            <th class="p-4 rounded-tr-xl">Clases Prácticas</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-stone-800">
+                        <tr class="bg-stone-950 text-gray-300">
+                            <td class="p-4">1-4</td>
+                            <td class="p-4">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Anatomía de la piel y el cabello.</li>
+                                    <li>Estructura craneal, tipos de cráneo y rostro.</li>
+                                    <li>Particiones, proyección, formas y contornos.</li>
+                                    <li>Historia de la barbería.</li>
+                                    <li>Posturas y ergonomía.</li>
+                                    <li>Accidentes de trabajo y primeros auxilios.</li>
+                                </ul>
+                            </td>
+                            <td class="p-4">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Observación y prácticas guiadas por el instructor.</li>
+                                    <li>Preparación del espacio de trabajo.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr class="bg-stone-950 text-gray-300">
+                            <td class="p-4">5-7</td>
+                            <td class="p-4">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Corte tradicional: técnicas de máquina y tijeras.</li>
+                                    <li>Corte Fade (degradado): principios y tipos.</li>
+                                </ul>
+                            </td>
+                            <td class="p-4">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>2 cortes de cabello tradicional.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr class="bg-stone-950 text-gray-300">
+                            <td class="p-4">8-10</td>
+                            <td class="p-4">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Barba: ritual de toallas calientes.</li>
+                                    <li>Servicio con navaja.</li>
+                                    <li>Enfermedades capilares.</li>
+                                </ul>
+                            </td>
+                            <td class="p-4">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>3 cortes de cabello degradado (fade).</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr class="bg-stone-950 text-gray-300">
+                            <td class="p-4">11-12</td>
+                            <td class="p-4">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Repaso de todo el temario.</li>
+                                    <li>Consejos para el desarrollo profesional.</li>
+                                </ul>
+                            </td>
+                            <td class="p-4">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>3 cortes y perfilado de barba con navaja y ritual de toallas calientes.</li>
+                                    <li>Preparación para el examen final.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="mt-8 text-gray-400 text-sm">El curso consta de 12 clases, una por semana, con 4 clases teóricas/demostrativas y 8 clases 
+prácticas. **No necesitas herramientas; nosotros las facilitamos.**</p>
+        </div>
+    </section>
+
+    <!-- Sección de Precios -->
+    <section id="precios" class="py-24 md:py-40 bg-stone-900">
+        <div class="container mx-auto px-4 text-center fade-in-up">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-16">
+                Inversión y <span class="text-yellow-500">Matrícula</span>
+            </h2>
+            <div class="max-w-2xl mx-auto bg-stone-950 p-8 rounded-2xl shadow-xl">
+                <table class="w-full text-xl text-white">
+                    <tbody class="divide-y divide-stone-800">
+                        <tr>
+                            <td class="py-4 text-left font-semibold text-yellow-500">Valor Curso</td>
+                            <td class="py-4 text-right font-bold">$300.000 CLP</td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 text-left font-semibold text-yellow-500">Valor Matrícula</td>
+                            <td class="py-4 text-right font-bold">$29.990 CLP</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold text-yellow-500 mb-4">Modalidad de Pago</h3>
+                    <p class="text-gray-400 text-lg">
+                        El curso se puede pagar en 3 cuotas de $100.000 CLP, con fechas de pago que se coordinarán al inicio del curso.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Galería de Estilo -->
+    <section id="galeria" class="py-24 md:py-40 bg-stone-950">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl md:text-5xl font-bold text-white text-center mb-16 fade-in-up">
+                <span class="text-yellow-500">Inspírate</span>, Crea, Transforma.
+            </h2>
+            <div class="max-w-lg mx-auto fade-in-up">
+                <blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="https://www.instagram.com/reel/DNRwWJjttYO/?utm_source=ig_web_copy_link" data-instgrm-version="14" style=" background:#FFF; border:0; border-radius:3px; box-shadow:0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15); margin: 1px auto; padding:0; width:99.375%; min-width:326px; max-width:540px;">
+                    <div style="padding:16px;">
+                        <a href="https://www.instagram.com/reel/DNRwWJjttYO/?utm_source=ig_embed&amp;utm_campaign=loading" style=" background:#FFFFFF; line-height:0; padding:0 0; text-align:center; text-decoration:none; width:100%;" target="_blank"> 
+                            <!-- Placeholder para Instagram -->
+                            <div style=" display: flex; flex-direction: row; align-items: center;">
+                                <div style="background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 40px; margin-right: 14px; width: 40px;"></div>
+                                <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center;">
+                                    <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 100px;"></div>
+                                    <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 60px;"></div>
+                                </div>
+                            </div>
+                            <div style="padding: 19% 0;"></div>
+                            <div style="display:block; height:50px; margin:0 auto 12px; width:50px;"><svg width="50px" height="50px" viewBox="0 0 60 60" version="1.1" xmlns="https://www.w3.org/2000/svg" xmlns:xlink="https://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-511.000000, -20.000000)" fill="#000000"><g><path d="M556.869,30.41 C554.814,30.41 553.148,32.076 553.148,34.131 C553.148,36.186 554.814,37.852 556.869,37.852 C558.924,37.852 560.59,36.186 560.59,34.131 C560.59,32.076 558.924,30.41 556.869,30.41 M541,60.657 C535.114,60.657 530.342,55.887 530.342,50 C530.342,44.114 535.114,39.342 541,39.342 C546.887,39.342 551.658,44.114 551.658,50 C551.658,55.887 546.887,60.657 541,60.657 M541,33.886 C532.1,33.886 524.886,41.1 524.886,50 C524.886,58.899 532.1,66.113 541,66.113 C549.9,66.113 557.115,58.899 557.115,50 C557.115,41.1 549.9,33.886 541,33.886 M565.378,62.101 C565.244,65.022 564.756,66.606 564.346,67.663 C563.803,69.06 563.154,70.057 562.106,71.106 C561.058,72.155 560.06,72.803 558.662,73.347 C557.607,73.757 556.021,74.244 553.102,74.378 C549.944,74.521 548.997,74.552 541,74.552 C533.003,74.552 532.056,74.521 528.898,74.378 C525.979,74.244 524.393,73.757 523.338,73.347 C521.94,72.803 520.942,72.155 519.894,71.106 C518.846,70.057 518.197,69.06 517.654,67.663 C517.244,66.606 516.755,65.022 516.623,62.101 C516.479,58.943 516.448,57.996 516.448,50 C516.448,42.003 516.479,41.056 516.623,37.899 C516.755,34.978 517.244,33.391 517.654,32.338 C518.197,30.938 518.846,29.942 519.894,28.894 C520.942,27.846 521.94,27.196 523.338,26.654 C524.393,26.244 525.979,25.756 528.898,25.623 C532.057,25.479 533.004,25.448 541,25.448 C548.997,25.448 549.943,25.479 553.102,25.623 C556.021,25.756 557.607,26.244 558.662,26.654 C560.06,27.196 561.058,27.846 562.106,28.894 C563.154,29.942 563.803,30.938 564.346,32.338 C564.756,33.391 565.244,34.978 565.378,37.899 C565.522,41.056 565.552,42.003 565.552,50 C565.552,57.996 565.522,58.943 565.378,62.101 M570.82,37.631 C570.674,34.438 570.167,32.258 569.425,30.349 C568.659,28.377 567.633,26.702 565.965,25.035 C564.297,23.368 562.623,22.342 560.652,21.575 C558.743,20.834 556.562,20.326 553.369,20.18 C550.169,20.033 549.148,20 541,20 C532.853,20 531.831,20.033 528.631,20.18 C525.438,20.326 523.257,20.834 521.349,21.575 C519.376,22.342 517.703,23.368 516.035,25.035 C514.368,26.702 513.342,28.377 512.574,30.349 C511.834,32.258 511.326,34.438 511.181,37.631 C511.035,40.831 511,41.851 511,50 C511,58.147 511.035,59.17 511.181,62.369 C511.326,65.562 511.834,67.743 512.574,69.651 C513.342,71.625 514.368,73.296 516.035,74.965 C517.703,76.634 519.376,77.658 521.349,78.425 C523.257,79.167 525.438,79.673 528.631,79.82 C531.831,79.965 532.853,80.001 541,80.001 C549.148,80.001 550.169,79.965 553.369,79.82 C556.562,79.673 558.743,79.167 560.652,78.425 C562.623,77.658 564.297,76.634 565.965,74.965 C567.633,73.296 568.659,71.625 569.425,69.651 C570.167,67.743 570.674,65.562 570.82,62.369 C570.966,59.17 571,58.147 571,50 C571,41.851 570.966,40.831 570.82,37.631"></path></g></g></g></svg></div><div style="padding-top: 8px;"> <div style=" color:#3897f0; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:550; line-height:18px;">Ver esta publicación en Instagram</div></div><div style="padding: 12.5% 0;"></div> <div style="display: flex; flex-direction: row; margin-bottom: 14px; align-items: center;"><div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(0px) translateY(7px);"></div> <div style="background-color: #F4F4F4; height: 12.5px; transform: rotate(-45deg) translateX(3px) translateY(1px); width: 12.5px; flex-grow: 0; margin-right: 14px; margin-left: 2px;"></div> <div style="background-color: #F4F4F4; border-radius: 50%; height: 12.5px; width: 12.5px; transform: translateX(9px) translateY(-18px);"></div></div><div style="margin-left: 8px;"> <div style=" background-color: #F4F4F4; border-radius: 50%; flex-grow: 0; height: 20px; width: 20px;"></div> <div style=" width: 0; height: 0; border-top: 2px solid transparent; border-left: 6px solid #f4f4f4; border-bottom: 2px solid transparent; transform: translateX(16px) translateY(-4px) rotate(30deg)"></div></div><div style="margin-left: auto;"> <div style=" width: 0px; border-top: 8px solid #F4F4F4; border-right: 8px solid transparent; transform: translateY(16px);"></div> <div style=" background-color: #F4F4F4; flex-grow: 0; height: 12px; width: 16px; transform: translateY(-4px);"></div> <div style=" width: 0; height: 0; border-top: 8px solid #F4F4F4; border-left: 8px solid transparent; transform: translateY(-4px) translateX(8px);"></div></div></div> <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: center; margin-bottom: 24px;"> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; margin-bottom: 6px; width: 224px;"></div> <div style=" background-color: #F4F4F4; border-radius: 4px; flex-grow: 0; height: 14px; width: 144px;"></div></div></a><p style=" color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; line-height:17px; margin-bottom:0; margin-top:8px; overflow:hidden; padding:8px 0 7px; text-align:center; text-overflow:ellipsis; white-space:nowrap;"><a href="https://www.instagram.com/reel/DNRwWJjttYO/?utm_source=ig_embed&amp;utm_campaign=loading" style=" color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none;" target="_blank">Una publicación compartida por La Sala - Cuidado &amp; Belleza Personal (@lasala.cl_)</a></p></div></blockquote>
+<script async src="//www.instagram.com/embed.js"></script>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Contacto y Formulario -->
+    <section id="contacto" class="relative py-24 md:py-40 flex items-center overflow-hidden">
+        <div class="overlay bg-black/90"></div>
+        <div class="relative z-20 container mx-auto px-4 grid md:grid-cols-2 gap-12 items-start">
+            <!-- Columna de Datos de Contacto -->
+            <div class="fade-in-up">
+                <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+                    Hablemos de tu <span class="text-yellow-500">futuro</span>.
+                </h2>
+                <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl">
+                    Contáctanos para resolver todas tus dudas sobre horarios, financiamiento y próximas fechas de inicio.
+                </p>
+                <div class="bg-stone-950/80 backdrop-blur-sm p-8 rounded-2xl shadow-2xl">
+                    <h3 class="text-2xl font-bold text-white mb-4">Datos de Contacto</h3>
+                    <div class="space-y-4 text-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-map-marker-alt text-yellow-500 mr-4"></i>
+                            <p class="text-gray-400">1 Norte 681, Viña Del Mar, Chile</p>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-phone text-yellow-500 mr-4"></i>
+                            <p class="text-gray-400">+56 9 5131 3211</p>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-yellow-500 mr-4"></i>
+                            <p class="text-gray-400">life.vinadelmar@gmail.com</p>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-map text-yellow-500 mr-4"></i>
+                            <a href="https://maps.app.goo.gl/51UFiGWKhDuknJBX8" target="_blank" class="text-yellow-500 hover:underline">Ver en el mapa</a>
+                        </div>
+                    </div>
+                    <div class="flex space-x-6 text-2xl mt-8">
+                        <a href="https://www.instagram.com/lifebarberia.cl/" target="_blank" class="text-gray-400 hover:text-yellow-500 transition-colors"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.tiktok.com/@lifebarberiastudio?_t=zm-8xpstz2jzvq&_r=1" target="_blank" class="text-gray-400 hover:text-yellow-500 transition-colors"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+            </div>
+            <!-- Columna del Formulario de Contacto -->
+            <div class="mt-16 md:mt-0 fade-in-up" style="animation-delay: 0.5s;">
+                <div class="bg-stone-950/80 backdrop-blur-sm p-8 rounded-2xl shadow-2xl">
+                    <h3 class="text-2xl font-bold text-white mb-4">Escríbenos por WhatsApp</h3>
+                    <form id="contact-form" class="space-y-4">
+                        <input type="text" id="nombre" name="nombre" placeholder="Tu Nombre Completo" class="w-full p-3 rounded-lg bg-stone-800 border border-stone-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-gray-200" required>
+                        <input type="email" id="email" name="email" placeholder="Tu Correo Electrónico" class="w-full p-3 rounded-lg bg-stone-800 border border-stone-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-gray-200">
+                        <textarea rows="4" id="mensaje" name="mensaje" placeholder="Tu Mensaje (opcional)" class="w-full p-3 rounded-lg bg-stone-800 border border-stone-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 text-gray-200"></textarea>
+                        <button type="submit" class="w-full bg-yellow-500 text-stone-950 font-bold py-3 rounded-lg transition-transform hover:scale-105 active:scale-95">
+                            Enviar Mensaje por WhatsApp
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer: Pie de página -->
+    <footer class="bg-stone-950 py-8">
+        <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
+            <p>&copy; 2025 LifeBarberia. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript para la funcionalidad de la página -->
+    <script>
+        // Manejo del menú de navegación para móviles
+        document.getElementById('mobile-menu-button').addEventListener('click', () => {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Ocultar el menú móvil al hacer clic en un enlace
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.add('hidden');
+            });
+        });
+        
+        // Formulario de contacto para enviar mensaje a WhatsApp
+        document.getElementById('contact-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const nombre = document.getElementById('nombre').value;
+            const mensajeAdicional = document.getElementById('mensaje').value;
+
+            const phoneNumber = '56951313211';
+            let whatsappMessage = `Hola, soy ${nombre}. Quisiera información para el curso de barbería.`;
+            if (mensajeAdicional) {
+                whatsappMessage += `\n\n${mensajeAdicional}`;
+            }
+
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+            window.open(whatsappUrl, '_blank');
+        });
+
+        // Observador de intersección para animaciones al hacer scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            const faders = document.querySelectorAll('.fade-in-up');
+            const appearOptions = {
+                threshold: 0.1,
+                rootMargin: "0px 0px -50px 0px"
+            };
+
+            const appearOnScroll = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) {
+                        return;
+                    }
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                });
+            }, appearOptions);
+
+            faders.forEach(fader => {
+                appearOnScroll.observe(fader);
+            });
+        });
+
+        // Lógica de la escena 3D con Three.js
+        window.onload = function() {
+            const container = document.getElementById('three-container');
+            let scene, camera, renderer, scissors;
+
+            function init() {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.z = 2;
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                container.appendChild(renderer.domElement);
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                scene.add(ambientLight);
+                const pointLight = new THREE.PointLight(0xffffff, 1);
+                pointLight.position.set(5, 5, 5);
+                scene.add(pointLight);
+
+                const geometry = createScissorsGeometry();
+                const material = new THREE.MeshPhysicalMaterial({
+                    color: 0xc8c8c8,
+                    metalness: 1,
+                    roughness: 0.2,
+                    clearcoat: 1,
+                    clearcoatRoughness: 0.1
+                });
+                scissors = new THREE.Mesh(geometry, material);
+                scene.add(scissors);
+                window.addEventListener('resize', onWindowResize, false);
+            }
+            
+            function createScissorsGeometry() {
+                const shape = new THREE.Shape();
+                shape.moveTo(0, 0);
+                shape.lineTo(0.1, 0.5);
+                shape.lineTo(0.3, 0.5);
+                shape.lineTo(0.2, 0);
+                shape.lineTo(0.1, -0.5);
+                shape.lineTo(0.3, -0.5);
+                shape.lineTo(0.1, 0);
+                
+                const extrudeSettings = {
+                    steps: 2,
+                    depth: 0.05,
+                    bevelEnabled: true,
+                    bevelThickness: 0.02,
+                    bevelSize: 0.02,
+                    bevelOffset: 0,
+                    bevelSegments: 5
+                };
+                return new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            }
+
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                if (scissors) {
+                    scissors.rotation.y += 0.005;
+                }
+                renderer.render(scene, camera);
+            }
+
+            init();
+            animate();
+        };
+    </script>
+    <script async src="//www.instagram.com/embed.js"></script>
+</body>
+</html>
